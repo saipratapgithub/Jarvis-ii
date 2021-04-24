@@ -1,0 +1,1137 @@
+!function(t){"use strict";var e=t.module("dashboard",["ngMaterial","ngRoute","md.data.table","db.utils","db.menu","db.company","db.company.list","db.qpp","db.incident","db.case","db.change","db.problem","db.actionItem","db.architecture"]);e.config(["$routeProvider","$locationProvider","$mdThemingProvider",function(t,e,i){i.theme("default").primaryPalette("green").accentPalette("yellow").warnPalette("red"),t.when("/",{template:"
+<company-list></company-list>"}).when("/company/:company_id",{template:"
+<dashboard></dashboard>"}),e.html5Mode(!1)}])}(window.angular),function(t){"use strict";function e(t,e){var i=this;i.company={},i.usingCase="sn_customerservice_case"==window.g_hi_issue_source,i.$onInit=function(){t.company_id&&e.getCompany(t.company_id).then(function(){i.company=e.company})}}e.$inject=["$routeParams","CompanyService"],t.module("dashboard").component("dashboard",{templateUrl:"dashboard/component.dashboard.tpl.html",controller:e})}(window.angular),function(t){"use strict";t.module("db.menu",["ngMaterial","ngRoute","db.utils"])}(window.angular),function(t){"use strict";function e(t,e,i,a,n,o,c,d,l){function r(t){p.loading=!1,p.companies=d.companyList,a.company_id&&(p.company=a.company_id,d.getCompany(a.company_id).then(u))}function s(t){n.path("/company/"+t.sys_id),u(t)}function m(t){o.reload()}function u(t){p.red="u_red"===t.status,p.yellow="u_yellow"===t.status,p.green="u_green"===t.status,p.grey=""===t.status||null===t.status||void 0===t.status,p.tooltip=t.tooltip,t.sync_date_time&&p._setLastSync(t.sync_date_time)}var p=this;p.companies=[],p.grey=!0,p.loading=!0,p.tooltip="",p._setLastSync=function(t){var e=t.split(" "),i=e[0].split("-"),a=e[1].split(":"),n=new Date(Date.UTC(i[0],Number(i[1])-1,i[2],a[0],a[1],a[2]));p.lastSync=n.toLocaleString()},p.selectCompany=s,p._onRouteChange=function(){var t=o.current.$$route.template;a.company_id?(p.company=a.company_id,d.getCompany(p.company).then(u)):(p.company=void 0,p.grey=!0),t&&l.postAnalyticsData(p.company)},p.$onInit=function(){d.getCompanies().then(r),t.$on("$routeChangeSuccess",p._onRouteChange)},p.startSync=function(){d.newSync(p.company).then(m);c.show(c.simple().textContent("Syncing Metrics").position("top right"))},p.saveAsBookmark=function(){window.open(location.href)}}e.$inject=["$rootScope","$scope","$log","$routeParams","$location","$route","$mdToast","CompanyService","AnalyticsService"],t.module("db.menu").component("menuBar",{templateUrl:"menu/component.menuBar.tpl.html",controller:e})}(window.angular),function(t){"use strict";t.module("db.actionItem",[])}(window.angular),function(t){"use strict";function e(t,e,i,a,n){var o=this;o.userID=window.g_s_t_u_i_d,o.$onInit=function(){function t(t){o.actionItemData=t}a.getActionItemData(e.company_id).then(t)},o.launchLink=function(t){setTimeout(function(){window.open(t,"_blank")},100)},o.getNewAILink=function(){return n.url+"/action_item.do?sys_id=-1&sysparm_query=company="+e.company_id+"^u_assigned_to="+o.userID}}e.$inject=["$scope","$routeParams","$mdInkRipple","ActionItemService","SNEndpoint"],t.module("db.actionItem").component("actionItem",{templateUrl:"actionItem/component.actionItem.tpl.html",bindings:{rowSpan:"<",colSpan:"<"},controller:e})}(window.angular),function(t){"use strict";function e(t,e,i,a,n){var o=this;o.getActionItemData=function(o){function c(t,e,i,a){return t.data.result}function d(t){var a="XHR Failed for getCustomer";return t.data&&t.data.description&&(a=a+"\n"+t.data.description),t.data.description=a,i.error(a),e.reject(t)}var l={method:"GET",url:n.url+"/api/snc/sam_dashboard_metric/action_item?sam_company_sid="+o,headers:a};return t(l).then(c,d)}}e.$inject=["$http","$q","$log","SNHeaders","SNEndpoint"],t.module("db.actionItem").service("ActionItemService",e)}(window.angular),function(t){"use strict";t.module("db.change",[])}(window.angular),function(t){"use strict";function e(t,e,i,a){var n=this;n.$onInit=function(){function t(t){n.changeData=t}a.getChangeData(e.company_id).then(t)},n.launchLink=function(t){setTimeout(function(){window.open(t,"_blank")},100)}}e.$inject=["$scope","$routeParams","$mdInkRipple","ChangeService"],t.module("db.change").component("change",{templateUrl:"change/component.change.tpl.html",bindings:{rowSpan:"<",colSpan:"<"},controller:e})}(window.angular),function(t){"use strict";function e(t,e,i,a,n){var o=this;o.getChangeDataStub=function(t){return e.resolve({name:"Change",link:"https://www.google.com",status:"u_yellow",metrics:[{name:"Maintenance",status:"u_green",link:"https://www.google.com/?q=green",open:{value:1,status:"u_green",link:"https://www.google.com/?q=green-yellow"},closedIncomplete:{value:0,status:"u_green",link:"https://www.google.com/?q=green-yellow"}},{name:"Upgrade",status:"u_yellow",link:"https://www.google.com/?q=green",open:{value:1,status:"u_green",link:"https://www.google.com/?q=green-yellow"},closedIncomplete:{value:1,status:"u_red",link:"https://www.google.com/?q=green-yellow"}},{name:"Other",status:"u_red",link:"https://www.google.com/?q=red",open:{value:5,status:"u_red",link:"https://www.google.com/?q=red-orange"},closedIncomplete:{value:2,status:"u_red",link:"https://www.google.com/?q=red-yellow"}}]})},o.getChangeData=function(o){function c(t,e,i,a){return t.data.result}function d(t){var a="XHR Failed for getCustomer";return t.data&&t.data.description&&(a=a+"\n"+t.data.description),t.data.description=a,i.error(a),e.reject(t)}var l={method:"GET",url:n.url+"/api/snc/sam_dashboard_metric/chg?sam_company_sid="+o,headers:a};return t(l).then(c,d)}}e.$inject=["$http","$q","$log","SNHeaders","SNEndpoint"],t.module("db.change").service("ChangeService",e)}(window.angular),function(t){"use strict";t.module("db.qpp",[])}(window.angular),function(t){"use strict";function e(t,e,i,a,n){var o=this;o.$onInit=function(){function t(t){o.QppData=t}a.getQppData(e.company_id).then(t)},o.toggleCustom=function(t,e){return o.custom=o.custom==t?e:t,o.custom},o.launchLink=function(t){setTimeout(function(){window.open(t,"_blank")},100)}}e.$inject=["$scope","$routeParams","$mdInkRipple","QppService","SNHeaders"],t.module("db.qpp").component("qpp",{templateUrl:"qpp/component.qpp.tpl.html",bindings:{rowSpan:"<",colSpan:"<"},controller:e})}(window.angular),function(t){"use strict";function e(t,e,i,a,n){var o=this;o.$onInit=function(){function t(t){o.qppCommData=t}a.getQppCommData(e.company_id).then(t)},o.launchLink=function(t){setTimeout(function(){window.open(t,"_blank")},100)}}e.$inject=["$scope","$routeParams","$mdInkRipple","QppService","SNHeaders"],t.module("db.qpp").component("qppComm",{templateUrl:"qpp/component.qppComm.tpl.html",bindings:{rowSpan:"<",colSpan:"<"},controller:e})}(window.angular),function(t){"use strict";function e(t,e,i,a,n){var o=this;o.$onInit=function(){function t(t){o.qppCommNextData=t}a.getQppCommNextData(e.company_id).then(t)},o.launchLink=function(t){setTimeout(function(){window.open(t,"_blank")},100)}}e.$inject=["$scope","$routeParams","$mdInkRipple","QppService","SNHeaders"],t.module("db.qpp").component("qppCommNext",{templateUrl:"qpp/component.qppCommNext.tpl.html",bindings:{rowSpan:"<",colSpan:"<"},controller:e})}(window.angular),function(t){"use strict";function e(t,e,i,a,n){var o=this;o.$onInit=function(){function t(t){o.qppDefaultData=t}a.getQppDefaultData(e.company_id).then(t)},o.launchLink=function(t){setTimeout(function(){window.open(t,"_blank")},100)}}e.$inject=["$scope","$routeParams","$mdInkRipple","QppService","SNHeaders"],t.module("db.qpp").component("qppDefault",{templateUrl:"qpp/component.qppDefault.tpl.html",bindings:{rowSpan:"<",colSpan:"<"},controller:e})}(window.angular),function(t){"use strict";function e(t,e,i,a,n){var o=this;o.$onInit=function(){function t(t){o.qppDefaultNextData=t}a.getQppDefaultNextData(e.company_id).then(t)},o.launchLink=function(t){setTimeout(function(){window.open(t,"_blank")},100)}}e.$inject=["$scope","$routeParams","$mdInkRipple","QppService","SNHeaders"],t.module("db.qpp").component("qppDefaultNext",{templateUrl:"qpp/component.qppDefaultNext.tpl.html",bindings:{rowSpan:"<",colSpan:"<"},controller:e})}(window.angular),function(t){"use strict";function e(t,e,i,a,n){var o=this;o.$onInit=function(){function t(t){o.qppProdData=t}a.getQppProdData(e.company_id).then(t)},o.launchLink=function(t){setTimeout(function(){window.open(t,"_blank")},100)}}e.$inject=["$scope","$routeParams","$mdInkRipple","QppService","SNHeaders"],t.module("db.qpp").component("qppProd",{templateUrl:"qpp/component.qppProd.tpl.html",bindings:{rowSpan:"<",colSpan:"<"},controller:e})}(window.angular),function(t){"use strict";function e(t,e,i,a,n){var o=this;o.$onInit=function(){function t(t){o.qppProdNextData=t}a.getQppProdNextData(e.company_id).then(t)},o.launchLink=function(t){setTimeout(function(){window.open(t,"_blank")},100)}}e.$inject=["$scope","$routeParams","$mdInkRipple","QppService","SNHeaders"],t.module("db.qpp").component("qppProdNext",{templateUrl:"qpp/component.qppProdNext.tpl.html",bindings:{rowSpan:"<",colSpan:"<"},controller:e})}(window.angular),function(t){"use strict";function e(t,e,i,a,n){function o(e){var i=c(e);return t(i).then(d,l)}function c(t){return{method:"GET",headers:a,url:t}}function d(t,e,i,a){return t.data.result}function l(t){var a="XHR Failed for get Customer";return t.data&&t.data.description&&(a=a+"\n"+t.data.description),t.data.description=a,i.error(a),e.reject(t)}var r=this;r.baseUrl=n.url+"/api/snc/sam_dashboard_metric/",r.httpConfig={method:"GET",headers:a},r.getQppData=function(t){return o(r.baseUrl+"qpp?sam_company_sid="+t)},r.getQppDefaultData=function(t){return o(r.baseUrl+"qpp_default?sam_company_sid="+t)},r.getQppDefaultNextData=function(t){return o(r.baseUrl+"qpp_default_next?sam_company_sid="+t)},r.getQppCommData=function(t){return o(r.baseUrl+"qpp_comm?sam_company_sid="+t)},r.getQppCommNextData=function(t){return o(r.baseUrl+"qpp_comm_next?sam_company_sid="+t)},r.getQppProdData=function(t){return o(r.baseUrl+"qpp_prod?sam_company_sid="+t)},r.getQppProdNextData=function(t){return o(r.baseUrl+"qpp_prod_next?sam_company_sid="+t)}}e.$inject=["$http","$q","$log","SNHeaders","SNEndpoint"],t.module("db.qpp").service("QppService",e)}(window.angular),function(t){"use strict";t.module("db.architecture",["md.data.table"])}(window.angular),function(t){"use strict";function e(t,e,i,a){var n=this;n.showArchitecture=!1,n.$onInit=function(){function t(t){n.architectureData=t}a.getArchitectureData(e.company_id).then(t)},n.launchLink=function(t){setTimeout(function(){window.open(t,"_blank")},100)}}e.$inject=["$scope","$routeParams","$mdInkRipple","ArchitectureService"],t.module("db.architecture").component("architecture",{templateUrl:"architecture/component.architecture.tpl.html",bindings:{rowSpan:"<",colSpan:"<"},controller:e})}(window.angular),function(t){"use strict";function e(t,e,i,a,n){var o=this;o.$onInit=function(){function t(t){o.databaseData=t}a.getDatabaseData(e.company_id).then(t)},o.launchLink=function(t){setTimeout(function(){window.open(t,"_blank")},100)}}e.$inject=["$scope","$routeParams","$mdInkRipple","ArchitectureService","SNHeaders"],t.module("db.architecture").component("database",{templateUrl:"architecture/component.database.tpl.html",bindings:{rowSpan:"<",colSpan:"<"},controller:e})}(window.angular),function(t){"use strict";function e(e,i,a,n,o,c){function d(t,e,i){t.specSettings=i,t.cancel=function(){e.cancel()}}d.$inject=["$scope","$mdDialog","special_settings"];var l=this;l.$onInit=function(){function t(t){l.instanceData=t}n.getInstanceData(i.company_id).then(t)},l.launchLink=function(t){setTimeout(function(){window.open(t,"_blank")},100)},l.showSpecialSettingsDialog=function(e,i){var a=t.element(document.body);c.show({parent:a,targetEvent:e,clickOutsideToClose:!0,controller:d,template:'
+<md-dialog aria-label="Special Settings" flex="40">
+    <md-toolbar class="profile-toolbar gauge-header" layout="row"><h3>Instance Special Settings</h3>
+        <div layout-align="end start">
+            <md-button class="md-icon-button" ng-click="cancel()">
+                <md-icon class="material-icons" aria-label="Close dialog">close</md-icon>
+            </md-button>
+        </div>
+    </md-toolbar>
+    <md-dialog-content>
+        <div class="md-dialog-content newlines" layout="row" layout-xs="column">
+            <div flex layout="column">
+                <md-checkbox md-no-ink class="gray" ng-repeat="special in specSettings.col1"
+                             ng-checked="{{special.value}}">{{special.name}}
+                </md-checkbox>
+            </div>
+            <div flex layout="column">
+                <md-checkbox md-no-ink class="gray" ng-repeat="special in specSettings.col2"
+                             ng-checked="{{special.value}}">{{special.name}}
+                </md-checkbox>
+            </div>
+        </div>
+        <div class="md-dialog-content newlines">{{specSettings.special_settings_text}}</div>
+    </md-dialog-content>
+</md-dialog>',locals:{special_settings:i}})}}e.$inject=["$scope","$routeParams","$mdInkRipple","ArchitectureService","SNHeaders","$mdDialog"],t.module("db.architecture").component("instance",{templateUrl:"architecture/component.instance.tpl.html",bindings:{rowSpan:"<",colSpan:"<"},controller:e})}(window.angular),function(t){"use strict";function e(t,e,i,a,n){var o=this;o.$onInit=function(){function t(t){o.vpnData=t}a.getVpnData(e.company_id).then(t)},o.launchLink=function(t){setTimeout(function(){window.open(t,"_blank")},100)}}e.$inject=["$scope","$routeParams","$mdInkRipple","ArchitectureService","SNHeaders"],t.module("db.architecture").component("vpn",{templateUrl:"architecture/component.vpn.tpl.html",bindings:{rowSpan:"<",colSpan:"<"},controller:e})}(window.angular),function(t){"use strict";function e(t,e,i,a,n){function o(e){var i=c(e);return t(i).then(d,l)}function c(t){return{method:"GET",headers:a,url:t}}function d(t,e,i,a){return t.data.result}function l(t){var a="XHR Failed for get Customer";return t.data&&t.data.description&&(a=a+"\n"+t.data.description),t.data.description=a,i.error(a),e.reject(t)}var r=this;r.baseUrl=n.url+"/api/snc/sam_dashboard_metric/",r.httpConfig={method:"GET",headers:a},r.getArchitectureData=function(t){return o(r.baseUrl+"arch?sam_company_sid="+t)},r.getInstanceData=function(t){return o(r.baseUrl+"arch_instance?sam_company_sid="+t)},r.getDatabaseData=function(t){return o(r.baseUrl+"arch_db?sam_company_sid="+t)},r.getVpnData=function(t){return o(r.baseUrl+"arch_vpn?sam_company_sid="+t)}}e.$inject=["$http","$q","$log","SNHeaders","SNEndpoint"],t.module("db.architecture").service("ArchitectureService",e)}(window.angular),function(t){"use strict";t.module("db.company",["ngRoute"])}(window.angular),function(t){"use strict";function e(t,e){function i(t){if(!a.canViewACV)for(var e=0;e
+<t.items.length;e++)"Total ACV"==t.items[e].label&&(t.items[e].value="Restricted");a.profile=t}var a=this;a.showCompanyProfile=!0,a.canViewACV=window.g_c_v_a,a.$onInit=function(){e.getCompanyProfile(t.company_id).then(i)},a.launchLink=function(t){setTimeout(function(){window.open(t,"_blank")},100)}}e.$inject=["$routeParams","CompanyService"],t.module("db.company").component("company",{templateUrl:"company/component.company.tpl.html",bindings:{company:"
+<comp"},controller:e})}(window.angular),function(){"use strict";angular.module("db.company.list",["ngRoute","ngMaterial","db.utils"])}(),function(){"use strict";function t(t){var e=this;this.searchTerm="",this.$onInit=function(){t.getCompanies().then(this._getCompaniesCOMPLETE)},this._getCompaniesCOMPLETE=function(){e.companyList=t.companyList}}t.$inject=["CompanyService"],angular.module("db.company.list").component("companyList",{templateUrl:"company_list/component.companyList.tpl.html",controller:t})}(),function(){"use strict";function t(t){this.navigateTo=function(e){t.path("/company/"+this.company.sys_id)}}t.$inject=["$location"],angular.module("db.company.list").component("companyListItem",{templateUrl:"company_list/component.companyListItem.tpl.html",bindings:{company:"<"},controller:t})}(),function(){"use strict";angular.module("db.company.list").filter("companyStatus",function(){return function(t){var e;switch(t){case"u_red":e="Red";break;case"u_yellow":e="Yellow";break;case"u_green":e="Green";break;default:e="N/A"}return e}})}(),function(t){"use strict";t.module("db.incident",[])}(window.angular),function(t){"use strict";function e(t,e,i,a,n){var o=this;o.$onInit=function(){function t(t){o.incidentData=t}a.getIncidentData(e.company_id).then(t)},o.launchLink=function(t){setTimeout(function(){window.open(t,"_blank")},100)}}e.$inject=["$scope","$routeParams","$mdInkRipple","IncidentService","SNHeaders"],t.module("db.incident").component("incident",{templateUrl:"incident/component.incident.tpl.html",bindings:{rowSpan:"<",colSpan:"<"},controller:e})}(window.angular),function(t){"use strict";function e(t,e,i,a,n){var o=this;o.$onInit=function(){function t(t){o.incidentANData=t}a.getIncidentANData(e.company_id).then(t)},o.launchLink=function(t){setTimeout(function(){window.open(t,"_blank")},100)}}e.$inject=["$scope","$routeParams","$mdInkRipple","IncidentService","SNHeaders"],t.module("db.incident").component("incidentActionNeeded",{templateUrl:"incident/component.incidentActionNeeded.tpl.html",bindings:{rowSpan:"<",colSpan:"<"},controller:e})}(window.angular),function(t){"use strict";function e(t,e,i,a,n){var o=this;o.$onInit=function(){function t(t){o.incidentActiveData=t}a.getIncidentActiveData(e.company_id).then(t)},o.launchLink=function(t){setTimeout(function(){window.open(t,"_blank")},100)}}e.$inject=["$scope","$routeParams","$mdInkRipple","IncidentService","SNHeaders"],t.module("db.incident").component("incidentActive",{templateUrl:"incident/component.incidentActive.tpl.html",bindings:{rowSpan:"<",colSpan:"<"},controller:e})}(window.angular),function(t){"use strict";function e(t,e,i,a,n){var o=this;o.$onInit=function(){function t(t){o.incidentSLAData=t}a.getIncidentSLAData(e.company_id).then(t)},o.launchLink=function(t){setTimeout(function(){window.open(t,"_blank")},100)}}e.$inject=["$scope","$routeParams","$mdInkRipple","IncidentService","SNHeaders"],t.module("db.incident").component("incidentSla",{templateUrl:"incident/component.incidentSla.tpl.html",bindings:{rowSpan:"<",colSpan:"<"},controller:e})}(window.angular),function(t){"use strict";function e(t,e,i,a,n){var o=this;o.$onInit=function(){function t(t){o.incident30DayData=t}a.getIncident30DayData(e.company_id).then(t)},o.launchLink=function(t){setTimeout(function(){window.open(t,"_blank")},100)}}e.$inject=["$scope","$routeParams","$mdInkRipple","IncidentService","SNHeaders"],t.module("db.incident").component("incidentThirty",{templateUrl:"incident/component.incidentThirty.tpl.html",bindings:{rowSpan:"<",colSpan:"<"},controller:e})}(window.angular),function(t){"use strict";function e(t,e,i,a,n){function o(e){var i=c(e);return t(i).then(d,l)}function c(t){return{method:"GET",headers:a,url:t}}function d(t,e,i,a){return t.data.result}function l(t){var a="XHR Failed for get Customer";return t.data&&t.data.description&&(a=a+"\n"+t.data.description),t.data.description=a,i.error(a),e.reject(t)}var r=this;r.baseUrl=n.url+"/api/snc/sam_dashboard_metric/",r.httpConfig={method:"GET",headers:a},r.getIncidentData=function(t){return o(r.baseUrl+"int?sam_company_sid="+t)},r.getIncidentActiveData=function(t){return o(r.baseUrl+"int_active?sam_company_sid="+t)},r.getIncident30DayData=function(t){return o(r.baseUrl+"int_30day?sam_company_sid="+t)},r.getIncidentANData=function(t){return o(r.baseUrl+"int_an?sam_company_sid="+t)},r.getIncidentSLAData=function(t){return o(r.baseUrl+"int_sla?sam_company_sid="+t)}}e.$inject=["$http","$q","$log","SNHeaders","SNEndpoint"],t.module("db.incident").service("IncidentService",e)}(window.angular),function(t){"use strict";t.module("db.case",[])}(window.angular),function(t){"use strict";function e(t,e,i,a,n){var o=this;o.$onInit=function(){function t(t){o.caseData=t}a.getCaseData(e.company_id).then(t)},o.launchLink=function(t){setTimeout(function(){window.open(t,"_blank")},100)}}e.$inject=["$scope","$routeParams","$mdInkRipple","CaseService","SNHeaders"],t.module("db.case").component("case",{templateUrl:"case/component.case.tpl.html",bindings:{rowSpan:"<",colSpan:"<"},controller:e})}(window.angular),function(t){"use strict";function e(t,e,i,a,n){var o=this;o.$onInit=function(){function t(t){o.caseANData=t}a.getCaseANData(e.company_id).then(t)},o.launchLink=function(t){setTimeout(function(){window.open(t,"_blank")},100)}}e.$inject=["$scope","$routeParams","$mdInkRipple","CaseService","SNHeaders"],t.module("db.case").component("caseActionNeeded",{templateUrl:"case/component.caseActionNeeded.tpl.html",bindings:{rowSpan:"<",colSpan:"<"},controller:e})}(window.angular),function(t){"use strict";function e(t,e,i,a,n){var o=this;o.$onInit=function(){function t(t){o.caseActiveData=t}a.getCaseActiveData(e.company_id).then(t)},o.launchLink=function(t){setTimeout(function(){window.open(t,"_blank")},100)}}e.$inject=["$scope","$routeParams","$mdInkRipple","CaseService","SNHeaders"],t.module("db.case").component("caseActive",{templateUrl:"case/component.caseActive.tpl.html",bindings:{rowSpan:"<",colSpan:"<"},controller:e})}(window.angular),function(t){"use strict";function e(t,e,i,a,n){var o=this;o.$onInit=function(){function t(t){o.caseSLAData=t}a.getCaseSLAData(e.company_id).then(t)},o.launchLink=function(t){setTimeout(function(){window.open(t,"_blank")},100)}}e.$inject=["$scope","$routeParams","$mdInkRipple","CaseService","SNHeaders"],t.module("db.case").component("caseSla",{templateUrl:"case/component.caseSla.tpl.html",bindings:{rowSpan:"<",colSpan:"<"},controller:e})}(window.angular),function(t){"use strict";function e(t,e,i,a,n){var o=this;o.$onInit=function(){function t(t){o.case30DayData=t}a.getCase30DayData(e.company_id).then(t)},o.launchLink=function(t){setTimeout(function(){window.open(t,"_blank")},100)}}e.$inject=["$scope","$routeParams","$mdInkRipple","CaseService","SNHeaders"],t.module("db.case").component("caseThirty",{templateUrl:"case/component.caseThirty.tpl.html",bindings:{rowSpan:"<",colSpan:"<"},controller:e})}(window.angular),function(t){"use strict";function e(t,e,i,a,n){function o(e){var i=c(e);return t(i).then(d,l)}function c(t){return{method:"GET",headers:a,url:t}}function d(t,e,i,a){return t.data.result}function l(t){var a="XHR Failed for get Customer";return t.data&&t.data.description&&(a=a+"\n"+t.data.description),t.data.description=a,i.error(a),e.reject(t)}var r=this;r.baseUrl=n.url+"/api/snc/sam_dashboard_metric/",r.httpConfig={method:"GET",headers:a},r.getCaseData=function(t){return o(r.baseUrl+"case?sam_company_sid="+t)},r.getCaseActiveData=function(t){return o(r.baseUrl+"case_active?sam_company_sid="+t)},r.getCase30DayData=function(t){return o(r.baseUrl+"case_30day?sam_company_sid="+t)},r.getCaseANData=function(t){return o(r.baseUrl+"case_an?sam_company_sid="+t)},r.getCaseSLAData=function(t){return o(r.baseUrl+"case_sla?sam_company_sid="+t)}}e.$inject=["$http","$q","$log","SNHeaders","SNEndpoint"],t.module("db.case").service("CaseService",e)}(window.angular),function(t){"use strict";t.module("db.problem",["ngRoute","ngMaterial","db.utils"])}(window.angular),function(t){"use strict";function e(t,e,i,a){var n=this;n.problemData={},n.$onInit=function(){function t(t){n.problemData=t}a.getProblemData(e.company_id).then(t)},n.launchLink=function(t){setTimeout(function(){window.open(t,"_blank")},100)}}e.$inject=["$scope","$routeParams","$mdInkRipple","ProblemService"],t.module("db.problem").component("problem",{templateUrl:"problem/component.problem.tpl.html",controller:e})}(window.angular),function(t){"use strict";function e(t,e,i,a,n){var o=this;o.getProblemData=function(o){function c(t,e,i,a){return t.data.result}function d(t){var a="XHR Failed for get Customer";return t.data&&t.data.description&&(a=a+"\n"+t.data.description),t.data.description=a,i.error(a),e.reject(t)}var l={method:"GET",url:n.url+"/api/snc/sam_dashboard_metric/prb?sam_company_sid="+o,headers:a};return t(l).then(c,d)}}e.$inject=["$http","$q","$log","SNHeaders","SNEndpoint"],t.module("db.problem").service("ProblemService",e)}(window.angular),function(t){"use strict";t.module("db.utils",[])}(window.angular),function(t){"use strict";function e(){var t=this;t.launchLink=function(){setTimeout(function(){window.open(t.link,"_blank")},100)}}t.module("db.utils").component("gaugeHeader",{templateUrl:"utils/component.gaugeHeader.tpl.html",bindings:{name:"<",status:"<",link:"<",tooltip:"<"},controller:e})}(window.angular),function(t){"use strict";function e(t,e,i){var a="";switch(i.metricCellStatus){case"u_yellow":a="cell-yellow";break;case"u_red":a="cell-red";break;case"u_green":a="cell-green";break;default:a="cell-grey"}e.css("color","rgba(0,0,0,0.87)"),e.addClass("cell-item"),e.addClass(a)}function i(){return{restrict:"A",link:e}}t.module("db.utils").directive("metricCellStatus",i)}(window.angular),function(t){"use strict";function e(t){return{url:/service-now/g.test(t.host())?"":"https://supporttoolsdev.service-now.com"}}e.$inject=["$location"],t.module("db.utils").factory("SNEndpoint",e)}(window.angular),function(t){"use strict";function e(){var t={Accept:"application/json","Content-Type":"application/json"};return window.g_ck?t["X-UserToken"]=window.g_ck:t.Authorization="Basic c2FtLmRhc2hib2FyZC10ZXN0OiRhbURCVDMkdA==",t}t.module("db.utils").factory("SNHeaders",e)}(window.angular),function(t){"use strict";function e(t,e,i,a,n){var o=this;o.postAnalyticsData=function(o){function c(t,i,a,n){e.debug("Analytics data posted to Support Tools")}function d(t){var a="XHR Failed for getCustomer";return t.data&&t.data.description&&(a=a+"\n"+t.data.description),t.data.description=a,e.error(a),i.reject(t)}o=o||"";var l={method:"POST",url:n.url+"/api/snc/sam_dashboard_company/analytics",params:{sys_id:o},headers:a};return t(l).then(c,d)}}e.$inject=["$http","$log","$q","SNHeaders","SNEndpoint"],t.module("db.utils").service("AnalyticsService",e)}(window.angular),function(t){"use strict";function e(t,e,i,a,n){var o=this;o._deferred=i.defer(),o.companyListPromise=o._deferred.promise,o.company={},o.companyList=[],o.getCompanyProfile=function(o){function c(t,e,i,a){return t.data.result}function d(t){var a="XHR Failed for getCustomer";return t.data&&t.data.description&&(a=a+"\n"+t.data.description),t.data.description=a,e.error(a),i.reject(t)}var l={method:"GET",url:n.url+"/api/snc/sam_dashboard_company/profile/"+o,headers:a};return t(l).then(c,d)},o.getCompanies=function(){function i(t,e,i,a){return o._deferred.resolve(t.data.result),o.companyList=t.data.result,o.companyList}function c(t){var i="XHR Failed for getCustomer";return t.data&&t.data.description&&(i=i+"\n"+t.data.description),t.data.description=i,e.error(i),o._deferred.reject(t)}var d={method:"GET",url:n.url+"/api/snc/sam_dashboard_company/get_companies",headers:a};return t(d).then(i,c),o.companyListPromise},o.getCompany=function(t){return o.companyListPromise.then(function(e){for(var i=0;i
+<o.companyList.length;i++)if(o.companyList[i].sys_id===t)return o.company=o.companyList[i],o.company;return null})},o.newSync=function(c){function d(t,e,i,a){var n=t.data.result;return o.companyList.forEach(function(t){t.sys_id===n.sys_id&&(t.status=n.status,t.name=n.name,t.sync_date_time=n.sync_date_time,t.sam=n.sam)}),n}function l(t){var a="XHR Failed for get Customer";return t.data&&t.data.description&&(a=a+"\n"+t.data.description),t.data.description=a,e.error(a),i.reject(t)}var r={method:"POST",url:n.url+"/api/snc/sam_dashboard_company/new_sync?sam_company_sid="+c,headers:a};return t(r).then(d,l)}}e.$inject=["$http","$log","$q","SNHeaders","SNEndpoint"],t.module("db.utils").service("CompanyService",e)}(window.angular),function(){angular.module("dashboard").run(["$templateCache",function(t){t.put("actionItem/component.actionItem.tpl.html",'
+<div md-whiteframe="8">
+    <gauge-header name="$ctrl.actionItemData.name" status="$ctrl.actionItemData.status" link="$ctrl.actionItemData.link"
+                  tooltip="$ctrl.actionItemData.tooltip"></gauge-header>
+    <md-content layout-padding>
+        <div class="data-grid">
+            <div class="data-grid-header" layout="row" ng-hide="$ctrl.actionItemData.metrics">
+                <div flex="100" layout="row">
+                    <div class="md-subhead">No Action Item metrics available for selected company</div>
+                </div>
+            </div>
+            <div class="data-grid-header" layout="row" ng-show="$ctrl.actionItemData.metrics">
+                <div flex layout="row" layout-align="start center">
+                    <div class="md-subhead"><strong>Type</strong></div>
+                </div>
+                <div flex layout="row" layout-align="center center">
+                    <div class="md-subhead"><strong>Count</strong></div>
+                </div>
+            </div>
+            <div class="data-grid-row" layout="row" ng-repeat="metric in $ctrl.actionItemData.metrics"
+                 metric-cell-status="{{metric.status}}" ng-click="$ctrl.launchLink(metric.link)" md-ink-ripple>
+                <md-tooltip md-direction="top" ng-if="metric.tooltip" md-autohide>{{metric.tooltip}}</md-tooltip>
+                <div flex layout="row" layout-align="start center">
+                    <div class="md-body-1">{{metric.name}}</div>
+                </div>
+                <div flex layout="row" layout-align="center center">
+                    <div class="md-body-1">{{metric.value}}</div>
+                </div>
+            </div>
+        </div>
+        <div>
+            <md-button class="action-item" ng-click="$ctrl.launchLink($ctrl.getNewAILink())">Create New</md-button>
+        </div>
+    </md-content>
+</div>'),t.put("architecture/component.architecture.tpl.html",'
+<div md-whiteframe="8" ng-cloak>
+    <md-toolbar id="architecture-gauge-toolbar" class="gauge-header profile-toolbar md-menu-toolbar">
+        <div class="md-toolbar-tools">
+            <md-switch md-no-ink="" class="gray" id="architecture" aria-label="Show Architecture Gauges"
+                       ng-model="$ctrl.showArchitecture"></md-switch>
+            <md-tooltip>{{$ctrl.architectureData.tooltip}}</md-tooltip>
+            <h2><span>{{$ctrl.architectureData.name}}</span></h2>
+            <div layout="row" layout-padding></div>
+            <div class="data-grid-row">
+                <div layout="row" class="md-body-1" ng-click="$ctrl.launchLink($ctrl.architectureData.link)"
+                     md-ink-ripple="#0000FF">Big Data DashBoard
+                </div>
+            </div>
+        </div>
+    </md-toolbar>
+    <md-content layout-padding ng-show="$ctrl.showArchitecture">
+        <div class="gauge-row" layout="column" layout-gt-sm="row">
+            <instance flex></instance>
+        </div>
+        <div class="gauge-row" layout="column" layout-gt-sm="row">
+            <database flex></database>
+        </div>
+        <div class="gauge-row" layout="column" layout-gt-sm="row">
+            <vpn flex></vpn>
+        </div>
+    </md-content>
+</div>'),t.put("architecture/component.database.tpl.html",'
+<div md-whiteframe="8">
+    <md-toolbar id="database-gauge-toolbar" class="gauge-header profile-toolbar md-menu-toolbar">
+        <div class="md-toolbar-tools" layout="row">
+            <md-tooltip>{{$ctrl.databaseData.tooltip}}</md-tooltip>
+            <h2><span>{{$ctrl.databaseData.name}}</span></h2></div>
+    </md-toolbar>
+    <div class="data-grid">
+        <div class="data-grid-header" layout="row" ng-hide="$ctrl.databaseData">
+            <div layout="row">
+                <div class="md-subhead">No database data available for selected company</div>
+            </div>
+        </div>
+        <md-table-container ng-show="$ctrl.databaseData">
+            <table md-table>
+                <thead md-head>
+                <tr md-row>
+                    <th md-column>Name</th>
+                    <th md-column>Host</th>
+                    <th md-column>Catalog</th>
+                    <th md-column>Primary</th>
+                    <th md-column>Type</th>
+                    <th md-column>Version</th>
+                    <th md-column>Size (GB)</th>
+                    <th md-column>Available (GB)</th>
+                    <th md-column>Read Reps</th>
+                    <th md-column>Last Backup</th>
+                </tr>
+                </thead>
+                <tbody md-body>
+                <tr md-row="" ng-repeat="db in $ctrl.databaseData.dbData">
+                    <td md-cell ng-click="$ctrl.launchLink(db.suffixLink)" md-ink-ripple>
+                        <md-tooltip md-direction="right">Links to DB record in Datacenter</md-tooltip>
+                        {{db.suffix}}
+                    </td>
+                    <td md-cell ng-click="$ctrl.launchLink(db.hostLink)" md-ink-ripple>
+                        <md-tooltip>Links to Host record in Datacenter</md-tooltip>
+                        {{db.host}}
+                    </td>
+                    <td md-cell ng-click="$ctrl.launchLink(db.catalogLink)" md-ink-ripple>
+                        <md-tooltip>Links to Catalog record in Datacenter</md-tooltip>
+                        {{db.catalog}}
+                    </td>
+                    <td md-cell>{{db.primarydb}}</td>
+                    <td md-cell>{{db.type}}</td>
+                    <td md-cell>{{db.db_version}}</td>
+                    <td md-cell>{{db.dbsize}}</td>
+                    <td md-cell>{{db.host_avail}}</td>
+                    <td md-cell>{{db.read}}</td>
+                    <td md-cell ng-click="$ctrl.launchLink(db.backupLink)" md-ink-ripple>
+                        <md-tooltip>Links to Last Backup record in Datacenter</md-tooltip>
+                        {{db.backup}}
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </md-table-container>
+    </div>
+</div>'),t.put("architecture/component.instance.tpl.html",'
+<div md-whiteframe="8">
+    <md-toolbar id="instance-gauge-toolbar" class="gauge-header profile-toolbar md-menu-toolbar">
+        <div class="md-toolbar-tools" layout="row">
+            <md-tooltip>{{$ctrl.instanceData.tooltip}}</md-tooltip>
+            <h2><span layout-align="left">{{$ctrl.instanceData.name}}</span></h2>
+            <div layout="row" layout-padding></div>
+            <div layout="row" class="md-body-1" layout-padding>Prod Count:
+                {{$ctrl.instanceData.instanceData.prodCount}}
+            </div>
+            <div layout="row" class="md-body-1" layout-padding>Sub-Prod Count:
+                {{$ctrl.instanceData.instanceData.subProdCount}}
+            </div>
+        </div>
+    </md-toolbar>
+    <div class="data-grid">
+        <div class="data-grid-header" layout="row" ng-hide="$ctrl.instanceData">
+            <div layout="row">
+                <div class="md-subhead">No instance data available for selected company</div>
+            </div>
+        </div>
+        <md-table-container ng-show="$ctrl.instanceData">
+            <table md-table>
+                <thead md-head>
+                <tr md-row>
+                    <th md-column>Name</th>
+                    <th md-column>Type</th>
+                    <th md-column>Operational Status</th>
+                    <th md-column>Assigned Version</th>
+                    <th md-column>Primary DC</th>
+                    <th md-column>Secondary DC</th>
+                    <th md-column>Hardware Type</th>
+                    <th md-column>Plugin Link</th>
+                    <th md-column>Alerts</th>
+                    <th md-column>Special Settings</th>
+                </tr>
+                </thead>
+                <tbody md-body>
+                <tr md-row="" ng-repeat="instance in $ctrl.instanceData.instanceData.data">
+                    <td md-cell ng-click="$ctrl.launchLink(instance.dc_instance_record)" md-ink-ripple>
+                        <md-tooltip md-direction="center">Links to Instance record in Datacenter</md-tooltip>
+                        {{instance.suffix}}
+                    </td>
+                    <td md-cell>{{instance.type}}</td>
+                    <td md-cell>{{instance.operational_status}}</td>
+                    <td md-cell>{{instance.assigned_version}}</td>
+                    <td md-cell ng-switch="instance.hasPrimaryDC"><span ng-switch-when="true" md-cell class="cell-link"
+                                                                        ng-click="$ctrl.launchLink(instance.primary_dc_app_node_link)"
+                                                                        md-ink-ripple><md-tooltip>Links to Primary app node record list in Datacenter</md-tooltip>{{instance.primary_dc}} </span><span
+                            ng-switch-when="false">On Premise</span> <span ng-switch-default>N/A</span></td>
+                    <td md-cell ng-switch="instance.hasSecondaryDC"><span ng-switch-when="true" class="cell-link"
+                                                                          ng-click="$ctrl.launchLink(instance.secondary_dc_app_node_link)"
+                                                                          md-ink-ripple><md-tooltip>Links to Secondary app node record list in Datacenter</md-tooltip>{{instance.secondary_dc}} </span><span
+                            ng-switch-when="false">On Premise</span> <span ng-switch-default>N/A</span></td>
+                    <td md-cell>{{instance.hardware_type}}</td>
+                    <td md-cell ng-click="$ctrl.launchLink(instance.plugin_link)" md-ink-ripple>HI Plugin List</td>
+                    <td md-cell ng-click="$ctrl.launchLink(instance.snacs.link)" md-ink-ripple>
+                        <md-tooltip>Links to list of SNACs in Datacenter (events in the last 72hrs)</md-tooltip>
+                        {{instance.snacs.num}}
+                    </td>
+                    <td md-cell ng-switch="instance.has_spec_settings"><span ng-switch-when="true" class="cell-link"
+                                                                             ng-click="$ctrl.showSpecialSettingsDialog($event,instance.special_settings)">View</span>
+                        <span ng-switch-default>None</span></td>
+                </tr>
+                </tbody>
+            </table>
+        </md-table-container>
+    </div>
+</div>'),
+t.put("architecture/component.vpn.tpl.html",'
+<div md-whiteframe="8">
+    <md-content layout-padding ng-show="$ctrl.vpnData.vpn">
+        <md-toolbar id="instance-gauge-toolbar" class="gauge-header profile-toolbar md-menu-toolbar">
+            <div class="md-toolbar-tools" layout="row">
+                <md-tooltip>{{$ctrl.vpnData.tooltip}}</md-tooltip>
+                <h2><span layout-align="left">VPN</span></h2></div>
+        </md-toolbar>
+        <div class="data-grid">
+            <div class="data-grid-header" layout="row" ng-hide="$ctrl.vpnData.vpn">
+                <div flex="100" layout="row">
+                    <div class="md-subhead">No VPN data available for selected company</div>
+                </div>
+            </div>
+            <md-table-container>
+                <table md-table>
+                    <thead md-head>
+                    <tr md-row>
+                        <th md-column>VPN Type</th>
+                        <th md-column>Site</th>
+                        <th md-column>End Point</th>
+                        <th md-column>Implementation Date</th>
+                    </tr>
+                    </thead>
+                    <tbody md-body>
+                    <tr md-row="" ng-repeat="vpn in $ctrl.vpnData.vpn">
+                        <td md-cell>{{vpn.vpn_type}}</td>
+                        <td md-cell>{{vpn.site}}</td>
+                        <td md-cell>{{vpn.endpoint}}</td>
+                        <td md-cell ng-click="$ctrl.launchLink(vpn.imp_link)" md-ink-ripple>
+                            <md-tooltip>Links to VPN Management record in Datacenter</md-tooltip>
+                            {{vpn.imp}}
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </md-table-container>
+        </div>
+    </md-content>
+</div>'),t.put("case/component.case.tpl.html",'
+<div md-whiteframe="8">
+    <gauge-header name="$ctrl.caseData.name" status="$ctrl.caseData.status" link="$ctrl.caseData.link"
+                  tooltip="$ctrl.caseData.tooltip"></gauge-header>
+    <md-content layout-padding>
+        <div class="gauge-row" layout="column" layout-gt-sm="row">
+            <case-active flex></case-active>
+            <case-thirty flex></case-thirty>
+            <case-action-needed flex></case-action-needed>
+            <case-sla flex></case-sla>
+        </div>
+    </md-content>
+</div>'),t.put("case/component.caseActionNeeded.tpl.html",'
+<div md-whiteframe="8">
+    <gauge-header name="$ctrl.caseANData.name" status="$ctrl.caseANData.status" link="$ctrl.caseANData.link"
+                  tooltip="$ctrl.caseANData.tooltip"></gauge-header>
+    <md-content layout-padding>
+        <div class="data-grid">
+            <div class="data-grid-header" layout="row" ng-hide="$ctrl.caseANData.metrics">
+                <div flex="100" layout="row">
+                    <div class="md-subhead">No case action needed metrics available for selected company</div>
+                </div>
+            </div>
+            <div class="data-grid-header" layout="row" ng-show="$ctrl.caseANData.metrics">
+                <div flex layout="row" layout-align="start center">
+                    <div class="md-subhead"><strong>Type</strong></div>
+                </div>
+                <div flex layout="row" layout-align="center center">
+                    <div class="md-subhead"><strong>Count</strong></div>
+                </div>
+            </div>
+            <div class="data-grid-row" layout="row" ng-repeat="metric in $ctrl.caseANData.metrics"
+                 metric-cell-status="{{metric.status}}" ng-click="$ctrl.launchLink(metric.link)" md-ink-ripple>
+                <md-tooltip md-direction="top" ng-if="metric.tooltip" md-autohide>{{metric.tooltip}}</md-tooltip>
+                <div flex layout="row" layout-align="start center">
+                    <div class="md-body-1">{{metric.name}}</div>
+                </div>
+                <div flex layout="row" layout-align="center center">
+                    <div class="md-body-1">{{metric.value}}</div>
+                </div>
+            </div>
+        </div>
+    </md-content>
+</div>'),t.put("case/component.caseActive.tpl.html",'
+<div md-whiteframe="8">
+    <gauge-header name="$ctrl.caseActiveData.name" status="$ctrl.caseActiveData.status" link="$ctrl.caseActiveData.link"
+                  tooltip="$ctrl.caseActiveData.tooltip"></gauge-header>
+    <md-content layout-padding>
+        <div class="data-grid">
+            <div class="data-grid-header" layout="row" ng-hide="$ctrl.caseActiveData.metrics">
+                <div flex="100" layout="row">
+                    <div class="md-subhead">No case active metrics available for selected company</div>
+                </div>
+            </div>
+            <div class="data-grid-header" layout="row" ng-show="$ctrl.caseActiveData.metrics">
+                <div flex="66" layout="row">
+                    <div layout="row" class="md-subhead"><strong>Type</strong></div>
+                    <div flex layout="row" layout-align="center center" class="md-subhead"><strong>Count</strong></div>
+                </div>
+                <div flex="33" layout="row" layout-align="center center">
+                    <div class="md-subhead"><strong>Escalated</strong></div>
+                </div>
+            </div>
+            <div class="data-grid-row" layout="row" ng-repeat="metric in $ctrl.caseActiveData.metrics">
+                <div flex="66" layout="row" metric-cell-status="{{metric.status}}" layout-align="start center"
+                     ng-click="$ctrl.launchLink(metric.active.link)" md-ink-ripple>
+                    <md-tooltip md-direction="top" ng-if="metric.active.tooltip" md-autohide>{{metric.active.tooltip}}
+                    </md-tooltip>
+                    <div layout-align="start center" class="md-body-1">{{metric.active.name}}</div>
+                    <div flex layout="row" layout-align="center center">
+                        <div class="md-body-1">{{metric.active.value}}</div>
+                    </div>
+                </div>
+                <div flex="33" layout="row" metric-cell-status="{{metric.status}}" layout-align="center center"
+                     ng-click="$ctrl.launchLink(metric.escalated.link)" md-ink-ripple>
+                    <md-tooltip md-direction="top" ng-if="metric.escalated.tooltip" md-autohide>
+                        {{metric.escalated.tooltip}}
+                    </md-tooltip>
+                    <div class="md-body-1">{{metric.escalated.value}}</div>
+                </div>
+            </div>
+        </div>
+    </md-content>
+</div>'),t.put("case/component.caseSla.tpl.html",'
+<div md-whiteframe="8">
+    <gauge-header name="$ctrl.caseSLAData.name" status="$ctrl.caseSLAData.status" link="$ctrl.caseSLAData.link"
+                  tooltip="$ctrl.caseSLAData.tooltip"></gauge-header>
+    <md-content layout-padding>
+        <div class="data-grid">
+            <div class="data-grid-header" layout="row" ng-hide="$ctrl.caseSLAData.metrics">
+                <div flex="100" layout="row">
+                    <div class="md-subhead">No case SLA metrics available for selected company</div>
+                </div>
+            </div>
+            <div class="data-grid-header" layout="row" ng-show="$ctrl.caseSLAData.metrics">
+                <div flex layout="row" layout-align="start center">
+                    <div class="md-subhead"><strong>Type</strong></div>
+                </div>
+                <div flex layout="row" layout-align="center center">
+                    <div class="md-subhead"><strong>Count</strong></div>
+                </div>
+            </div>
+            <div class="data-grid-row" layout="row" ng-repeat="metric in $ctrl.caseSLAData.metrics"
+                 metric-cell-status="{{metric.status}}" ng-click="$ctrl.launchLink(metric.link)" md-ink-ripple>
+                <md-tooltip md-direction="top" ng-if="metric.tooltip" md-autohide>{{metric.tooltip}}</md-tooltip>
+                <div flex layout="row" layout-align="start center">
+                    <div class="md-body-1">{{metric.name}}</div>
+                </div>
+                <div flex layout="row" layout-align="center center">
+                    <div class="md-body-1">{{metric.value}}</div>
+                </div>
+            </div>
+        </div>
+    </md-content>
+</div>'),t.put("case/component.caseThirty.tpl.html",'
+<div md-whiteframe="8">
+    <gauge-header name="$ctrl.case30DayData.name" status="$ctrl.case30DayData.status" link="$ctrl.case30DayData.link"
+                  tooltip="$ctrl.case30DayData.tooltip"></gauge-header>
+    <md-content layout-padding>
+        <div class="data-grid">
+            <div class="data-grid-header" layout="row" ng-hide="$ctrl.case30DayData.metrics">
+                <div flex="100" layout="row">
+                    <div class="md-subhead">No case 30 day metrics available for selected company</div>
+                </div>
+            </div>
+            <div class="data-grid-header" layout="row" ng-show="$ctrl.case30DayData.metrics">
+                <div flex layout="row" layout-align="start center">
+                    <div class="md-subhead"><strong>Type</strong></div>
+                </div>
+                <div flex layout="row" layout-align="center center">
+                    <div class="md-subhead"><strong>Count</strong></div>
+                </div>
+            </div>
+            <div class="data-grid-row" layout="row" ng-repeat="metric in $ctrl.case30DayData.metrics"
+                 metric-cell-status="{{metric.status}}" ng-click="$ctrl.launchLink(metric.link)" md-ink-ripple>
+                <md-tooltip md-direction="top" ng-if="metric.tooltip" md-autohide>{{metric.tooltip}}</md-tooltip>
+                <div flex layout="row" layout-align="start center">
+                    <div class="md-body-1">{{metric.name}}</div>
+                </div>
+                <div flex layout="row" layout-align="center center">
+                    <div class="md-body-1">{{metric.value}}</div>
+                </div>
+            </div>
+        </div>
+    </md-content>
+</div>'),t.put("change/component.change.tpl.html",'
+<div md-whiteframe="8">
+    <gauge-header name="$ctrl.changeData.name" status="$ctrl.changeData.status" link="$ctrl.changeData.link"
+                  tooltip="$ctrl.changeData.tooltip"></gauge-header>
+    <md-content layout-padding>
+        <div class="data-grid">
+            <div class="data-grid-header" layout="row" ng-hide="$ctrl.changeData.metrics">
+                <div flex="100" layout="row">
+                    <div class="md-subhead">No change metrics available for selected company</div>
+                </div>
+            </div>
+            <div class="data-grid-header" layout="row" ng-show="$ctrl.changeData.metrics">
+                <div flex layout="row" layout-align="start center">
+                    <div class="md-subhead"><strong>Type</strong></div>
+                </div>
+                <div flex layout="row" layout-align="center center">
+                    <div class="md-subhead"><strong>Open</strong></div>
+                </div>
+                <div flex layout="row" layout-align="center center">
+                    <div class="md-subhead"><strong>Cancelled</strong></div>
+                </div>
+                <div flex layout="row" layout-align="center center">
+                    <div class="md-subhead"><strong>Successful w/ Issues</strong></div>
+                </div>
+            </div>
+            <div layout="column" ng-repeat="metric in $ctrl.changeData.metrics">
+                <div class="data-grid-row" layout="row">
+                    <div flex="25" metric-cell-status="{{metric.status}}" layout="row" layout-align="start center"
+                         ng-click="$ctrl.launchLink(metric.link)" md-ink-ripple>
+                        <md-tooltip md-direction="top" ng-if="metric.tooltip" md-autohide>{{metric.tooltip}}
+                        </md-tooltip>
+                        <div class="md-body-1">{{metric.name}}</div>
+                    </div>
+                    <div flex="25" metric-cell-status="{{metric.open.status}}" layout="row" layout-align="center center"
+                         ng-click="$ctrl.launchLink(metric.open.link)" md-ink-ripple>
+                        <md-tooltip md-direction="top" ng-if="metric.open.tooltip" md-autohide>{{metric.open.tooltip}}
+                        </md-tooltip>
+                        <div class="md-body-1">{{metric.open.value}}</div>
+                    </div>
+                    <div flex="25" metric-cell-status="{{metric.closedIncomplete.status}}" layout="row"
+                         layout-align="center center" ng-click="$ctrl.launchLink(metric.closedIncomplete.link)"
+                         md-ink-ripple>
+                        <md-tooltip md-direction="top" ng-if="metric.closedIncomplete.tooltip" md-autohide>
+                            {{metric.closedIncomplete.tooltip}}
+                        </md-tooltip>
+                        <div class="md-body-1">{{metric.closedIncomplete.value}}</div>
+                    </div>
+                    <div flex="25" metric-cell-status="{{metric.successfulWIssues.status}}" layout="row"
+                         layout-align="center center" ng-click="$ctrl.launchLink(metric.successfulWIssues.link)"
+                         md-ink-ripple>
+                        <md-tooltip md-direction="top" ng-if="metric.closedIncomplete.tooltip" md-autohide>
+                            {{metric.successfulWIssues.tooltip}}
+                        </md-tooltip>
+                        <div class="md-body-1">{{metric.successfulWIssues.value}}</div>
+                    </div>
+                </div>
+                <div layout="column" ng-show="metric.childMetrics.length > 0"
+                     ng-repeat="cMetric in metric.childMetrics">
+                    <div class="data-grid-row data-grid-sub-row" layout="row">
+                        <div flex layout="row" ng-click="$ctrl.launchLink(cMetric.link)"
+                             metric-cell-status="{{cMetric.status}}" md-ink-ripple>
+                            <md-tooltip md-direction="top" ng-if="cMetric.tooltip" md-autohide>{{cMetric.tooltip}}
+                            </md-tooltip>
+                            <div class="md-caption">{{cMetric.name}}</div>
+                        </div>
+                        <div flex layout="row" layout-align="center center"
+                             ng-click="$ctrl.launchLink(cMetric.open.link)" metric-cell-status="{{cMetric.open.status}}"
+                             md-ink-ripple>
+                            <md-tooltip md-direction="top" ng-if="cMetric.open.tooltip" md-autohide>
+                                {{cMetric.open.tooltip}}
+                            </md-tooltip>
+                            <div class="md-body-1">{{cMetric.open.value}}</div>
+                        </div>
+                        <div flex layout="row" layout-align="center center"
+                             ng-click="$ctrl.launchLink(cMetric.closedIncomplete.link)"
+                             metric-cell-status="{{cMetric.closedIncomplete.status}}" md-ink-ripple>
+                            <md-tooltip md-direction="top" ng-if="cMetric.closedIncomplete.tooltip" md-autohide>
+                                {{cMetric.closedIncomplete.tooltip}}
+                            </md-tooltip>
+                            <div class="md-body-1">{{cMetric.closedIncomplete.value}}</div>
+                        </div>
+                        <div flex layout="row" layout-align="center center"
+                             ng-click="$ctrl.launchLink(cMetric.successfulWIssues.link)"
+                             metric-cell-status="{{cMetric.successfulWIssues.status}}" md-ink-ripple>
+                            <md-tooltip md-direction="top" ng-if="cMetric.successfulWIssues.tooltip" md-autohide>
+                                {{cMetric.successfulWIssues.tooltip}}
+                            </md-tooltip>
+                            <div class="md-body-1">{{cMetric.successfulWIssues.value}}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </md-content>
+</div>'),t.put("company/component.company.tpl.html",'
+<div md-whiteframe="8">
+    <md-toolbar id="company-gauge-toolbar" class="gauge-header profile-toolbar md-menu-toolbar">
+        <div class="md-toolbar-tools">
+            <md-switch
+                    ng-class="{\'md-primary\': $ctrl.company.status === \'u_green\', \'md-accent\': $ctrl.company.status === \'u_yellow\', \'md-warn\': $ctrl.company.status === \'u_red\'}"
+                    ng-model="$ctrl.showCompanyProfile" aria-label="Show Company Data"></md-switch>
+            <h2><span>Company Profile</span></h2><span flex></span>
+            <md-button ng-href="{{$ctrl.profile.tableau.link}}" target="_blank">Customer Insights Dashboard</md-button>
+            <md-button ng-href="{{$ctrl.profile.surf.link}}" target="_blank">Surf</md-button>
+            <md-button ng-href="{{$ctrl.profile.hi.link}}" target="_blank">HI</md-button>
+            <md-button ng-href="{{$ctrl.profile.support_tools.link}}" target="_blank">Company Record in ST</md-button>
+        </div>
+    </md-toolbar>
+    <md-content ng-show="$ctrl.showCompanyProfile" layout="row" layout-padding>
+        <div flex="50" class="profile-row">
+            <div class="profile-item" ng-repeat="item in $ctrl.profile.items" layout="row"
+                 layout-align="space-between center" ng-click="$ctrl.launchLink(item.link);"><strong flex>{{item.label +
+                \':\'}}</strong> <span flex>{{item.value === \'\' ? \'Not Available\' : item.value}}</span></div>
+        </div>
+        <div flex="50" class="profile-row">
+            <div class="profile-item" ng-repeat="contact in $ctrl.profile.contacts" layout="row"
+                 layout-align="space-between center" ng-click="$ctrl.launchLink(contact.link);"><strong flex>{{contact.label
+                + \':\'}}</strong> <span flex>{{contact.value === \'\' ? \'Not Available\' : contact.value}}</span>
+            </div>
+        </div>
+    </md-content>
+</div>'),t.put("company_list/component.companyList.tpl.html",'
+<md-list>
+    <md-list-item>
+        <md-input-container flex><label>Search</label><input type="text" ng-model="$ctrl.searchTerm">
+        </md-input-container>
+    </md-list-item>
+    <company-list-item ng-repeat="comp in $ctrl.companyList | filter:$ctrl.searchTerm"
+                       company="comp"></company-list-item>
+</md-list>'),t.put("company_list/component.companyListItem.tpl.html","
+<md-list-item ng-click=\"$ctrl.navigateTo($event)\"><p>{{::$ctrl.company.name}}</p>
+    <p>{{::$ctrl.company.sam}}</p>
+    <md-button class=\"md-raised\"ng-class=\"{'md-primary': $ctrl.company.status===
+    'u_green', 'md-accent': $ctrl.company.status == 'u_yellow', 'md-warn': $ctrl.company.status ===
+    'u_red'}\">{{::$ctrl.company.status | companyStatus}}</md-button>
+</md-list-item>"),t.put("dashboard/component.dashboard.tpl.html",'
+<div id="dashboard-container" layout="column">
+    <company comp="$ctrl.company"></company>
+    <incident ng-if="!$ctrl.usingCase"></incident>
+    <case ng-if="$ctrl.usingCase"></case>
+    <div class="gauge-row" layout="column" layout-gt-sm="row">
+        <change flex></change>
+        <problem flex></problem>
+        <action-item flex></action-item>
+    </div>
+    <div>
+        <qpp></qpp>
+    </div>
+    <architecture></architecture>
+</div>'),t.put("incident/component.incident.tpl.html",'
+<div md-whiteframe="8">
+    <gauge-header name="$ctrl.incidentData.name" status="$ctrl.incidentData.status" link="$ctrl.incidentData.link"
+                  tooltip="$ctrl.incidentData.tooltip"></gauge-header>
+    <md-content layout-padding>
+        <div class="gauge-row" layout="column" layout-gt-sm="row">
+            <incident-active flex></incident-active>
+            <incident-thirty flex></incident-thirty>
+            <incident-action-needed flex></incident-action-needed>
+            <incident-sla flex></incident-sla>
+        </div>
+    </md-content>
+</div>'),t.put("incident/component.incidentActionNeeded.tpl.html",'
+<div md-whiteframe="8">
+    <gauge-header name="$ctrl.incidentANData.name" status="$ctrl.incidentANData.status" link="$ctrl.incidentANData.link"
+                  tooltip="$ctrl.incidentANData.tooltip"></gauge-header>
+    <md-content layout-padding>
+        <div class="data-grid">
+            <div class="data-grid-header" layout="row" ng-hide="$ctrl.incidentANData.metrics">
+                <div flex="100" layout="row">
+                    <div class="md-subhead">No incident action needed metrics available for selected company</div>
+                </div>
+            </div>
+            <div class="data-grid-header" layout="row" ng-show="$ctrl.incidentANData.metrics">
+                <div flex layout="row" layout-align="start center">
+                    <div class="md-subhead"><strong>Type</strong></div>
+                </div>
+                <div flex layout="row" layout-align="center center">
+                    <div class="md-subhead"><strong>Count</strong></div>
+                </div>
+            </div>
+            <div class="data-grid-row" layout="row" ng-repeat="metric in $ctrl.incidentANData.metrics"
+                 metric-cell-status="{{metric.status}}" ng-click="$ctrl.launchLink(metric.link)" md-ink-ripple>
+                <md-tooltip md-direction="top" ng-if="metric.tooltip" md-autohide>{{metric.tooltip}}</md-tooltip>
+                <div flex layout="row" layout-align="start center">
+                    <div class="md-body-1">{{metric.name}}</div>
+                </div>
+                <div flex layout="row" layout-align="center center">
+                    <div class="md-body-1">{{metric.value}}</div>
+                </div>
+            </div>
+        </div>
+    </md-content>
+</div>'),t.put("incident/component.incidentActive.tpl.html",'
+<div md-whiteframe="8">
+    <gauge-header name="$ctrl.incidentActiveData.name" status="$ctrl.incidentActiveData.status"
+                  link="$ctrl.incidentActiveData.link" tooltip="$ctrl.incidentActiveData.tooltip"></gauge-header>
+    <md-content layout-padding>
+        <div class="data-grid">
+            <div class="data-grid-header" layout="row" ng-hide="$ctrl.incidentActiveData.metrics">
+                <div flex="100" layout="row">
+                    <div class="md-subhead">No incident active metrics available for selected company</div>
+                </div>
+            </div>
+            <div class="data-grid-header" layout="row" ng-show="$ctrl.incidentActiveData.metrics">
+                <div flex="66" layout="row">
+                    <div layout="row" class="md-subhead"><strong>Type</strong></div>
+                    <div flex layout="row" layout-align="center center" class="md-subhead"><strong>Count</strong></div>
+                </div>
+                <div flex="33" layout="row" layout-align="center center">
+                    <div class="md-subhead"><strong>Escalated</strong></div>
+                </div>
+            </div>
+            <div class="data-grid-row" layout="row" ng-repeat="metric in $ctrl.incidentActiveData.metrics">
+                <div flex="66" layout="row" metric-cell-status="{{metric.status}}" layout-align="start center"
+                     ng-click="$ctrl.launchLink(metric.active.link)" md-ink-ripple>
+                    <md-tooltip md-direction="top" ng-if="metric.active.tooltip" md-autohide>{{metric.active.tooltip}}
+                    </md-tooltip>
+                    <div layout-align="start center" class="md-body-1">{{metric.active.name}}</div>
+                    <div flex layout="row" layout-align="center center">
+                        <div class="md-body-1">{{metric.active.value}}</div>
+                    </div>
+                </div>
+                <div flex="33" layout="row" metric-cell-status="{{metric.status}}" layout-align="center center"
+                     ng-click="$ctrl.launchLink(metric.escalated.link)" md-ink-ripple>
+                    <md-tooltip md-direction="top" ng-if="metric.escalated.tooltip" md-autohide>
+                        {{metric.escalated.tooltip}}
+                    </md-tooltip>
+                    <div class="md-body-1">{{metric.escalated.value}}</div>
+                </div>
+            </div>
+        </div>
+    </md-content>
+</div>'),t.put("incident/component.incidentSla.tpl.html",'
+<div md-whiteframe="8">
+    <gauge-header name="$ctrl.incidentSLAData.name" status="$ctrl.incidentSLAData.status"
+                  link="$ctrl.incidentSLAData.link" tooltip="$ctrl.incidentSLAData.tooltip"></gauge-header>
+    <md-content layout-padding>
+        <div class="data-grid">
+            <div class="data-grid-header" layout="row" ng-hide="$ctrl.incidentSLAData.metrics">
+                <div flex="100" layout="row">
+                    <div class="md-subhead">No incident SLA metrics available for selected company</div>
+                </div>
+            </div>
+            <div class="data-grid-header" layout="row" ng-show="$ctrl.incidentSLAData.metrics">
+                <div flex layout="row" layout-align="start center">
+                    <div class="md-subhead"><strong>Type</strong></div>
+                </div>
+                <div flex layout="row" layout-align="center center">
+                    <div class="md-subhead"><strong>Count</strong></div>
+                </div>
+            </div>
+            <div class="data-grid-row" layout="row" ng-repeat="metric in $ctrl.incidentSLAData.metrics"
+                 metric-cell-status="{{metric.status}}" ng-click="$ctrl.launchLink(metric.link)" md-ink-ripple>
+                <md-tooltip md-direction="top" ng-if="metric.tooltip" md-autohide>{{metric.tooltip}}</md-tooltip>
+                <div flex layout="row" layout-align="start center">
+                    <div class="md-body-1">{{metric.name}}</div>
+                </div>
+                <div flex layout="row" layout-align="center center">
+                    <div class="md-body-1">{{metric.value}}</div>
+                </div>
+            </div>
+        </div>
+    </md-content>
+</div>'),t.put("incident/component.incidentThirty.tpl.html",'
+<div md-whiteframe="8">
+    <gauge-header name="$ctrl.incident30DayData.name" status="$ctrl.incident30DayData.status"
+                  link="$ctrl.incident30DayData.link" tooltip="$ctrl.incident30DayData.tooltip"></gauge-header>
+    <md-content layout-padding>
+        <div class="data-grid">
+            <div class="data-grid-header" layout="row" ng-hide="$ctrl.incident30DayData.metrics">
+                <div flex="100" layout="row">
+                    <div class="md-subhead">No incident 30 day metrics available for selected company</div>
+                </div>
+            </div>
+            <div class="data-grid-header" layout="row" ng-show="$ctrl.incident30DayData.metrics">
+                <div flex layout="row" layout-align="start center">
+                    <div class="md-subhead"><strong>Type</strong></div>
+                </div>
+                <div flex layout="row" layout-align="center center">
+                    <div class="md-subhead"><strong>Count</strong></div>
+                </div>
+            </div>
+            <div class="data-grid-row" layout="row" ng-repeat="metric in $ctrl.incident30DayData.metrics"
+                 metric-cell-status="{{metric.status}}" ng-click="$ctrl.launchLink(metric.link)" md-ink-ripple>
+                <md-tooltip md-direction="top" ng-if="metric.tooltip" md-autohide>{{metric.tooltip}}</md-tooltip>
+                <div flex layout="row" layout-align="start center">
+                    <div class="md-body-1">{{metric.name}}</div>
+                </div>
+                <div flex layout="row" layout-align="center center">
+                    <div class="md-body-1">{{metric.value}}</div>
+                </div>
+            </div>
+        </div>
+    </md-content>
+</div>'),t.put("menu/component.menuBar.tpl.html",'
+<md-toolbar
+        ng-class="{\'md-warn\': $ctrl.red, \'md-primary\': $ctrl.green, \'md-accent\': $ctrl.yellow, \'empty-menu\': $ctrl.grey}">
+    <div layout="row" layout-align="space-between center" class="md-toolbar-tools">
+        <md-tooltip md-direction="top" ng-if="$ctrl.tooltip" md-autohide>{{$ctrl.tooltip}}</md-tooltip>
+        <span></span>
+        <md-input-container ng-hide="$ctrl.loading">
+            <md-select ng-model="$ctrl.company" placeholder="Select a Company">
+                <md-option ng-repeat="company in $ctrl.companies track by company.sys_id" value="{{company.sys_id}}"
+                           ng-click="$ctrl.selectCompany(company)">{{company.name}}
+                </md-option>
+            </md-select>
+        </md-input-container>
+        <span ng-show="$ctrl.loading" layout="row" layout-align="space-around center"><span>Loading</span><md-progress-circular
+                md-mode="indeterminate"></md-progress-circular></span><span layout="column" layout-align="center end"
+                                                                            ng-hide="$ctrl.loading || !$ctrl.company"><span
+            class="row"><md-button class="md-icon-button" ng-click="$ctrl.startSync()"><md-icon>sync</md-icon></md-button><md-button
+            class="md-icon-button" ng-click="$ctrl.saveAsBookmark()"><md-icon>bookmark</md-icon></md-button></span><span
+            class="row"><span class="md-caption">Last sync: {{$ctrl.lastSync}}</span> </span></span><span
+            ng-show="$ctrl.loading || !$ctrl.company"></span></div>
+</md-toolbar>'),t.put("problem/component.problem.tpl.html",'
+<div md-whiteframe="8">
+    <gauge-header name="$ctrl.problemData.name" status="$ctrl.problemData.status" link="$ctrl.problemData.link"
+                  tooltip="$ctrl.problemData.tooltip"></gauge-header>
+    <md-content layout-padding>
+        <div class="data-grid">
+            <div class="data-grid-header" layout="row" ng-hide="$ctrl.problemData.metrics">
+                <div flex="100" layout="row">
+                    <div class="md-subhead">No problem metrics available for selected company</div>
+                </div>
+            </div>
+            <div class="data-grid-header" layout="row" ng-show="$ctrl.problemData.metrics">
+                <div flex="50" layout="row">
+                    <div class="md-subhead"><strong>Type</strong></div>
+                </div>
+                <div flex="50" layout="row" layout-align="center center">
+                    <div class="md-subhead"><strong>Count</strong></div>
+                </div>
+            </div>
+            <div class="data-grid-row" ng-repeat="metric in $ctrl.problemData.metrics">
+                <div layout="row" ng-click="$ctrl.launchLink(metric.link)" metric-cell-status="{{metric.status}}"
+                     md-ink-ripple>
+                    <md-tooltip md-direction="top" ng-if="metric.tooltip" md-autohide>{{metric.tooltip}}</md-tooltip>
+                    <div flex layout="row" layout-align="start center">
+                        <div class="md-body-1">{{metric.name}}</div>
+                    </div>
+                    <div flex layout="row" layout-align="center center">
+                        <div class="md-body-1">{{metric.value}}</div>
+                    </div>
+                </div>
+                <div class="data-grid-row data-grid-sub-row" ng-repeat="childMetric in metric.childMetrics" layout="row"
+                     ng-click="$ctrl.launchLink(childMetric.link)" metric-cell-status="{{childMetric.status}}"
+                     md-ink-ripple>
+                    <md-tooltip md-direction="top" ng-if="childMetric.tooltip" md-autohide>{{childMetric.tooltip}}
+                    </md-tooltip>
+                    <div flex layout="row" layout-align="start center">
+                        <div class="md-caption">{{childMetric.name}}</div>
+                    </div>
+                    <div flex layout="row" layout-align="center center">
+                        <div class="md-body-1">{{childMetric.value}}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </md-content>
+</div>'),t.put("qpp/component.qpp.tpl.html",'
+<div md-whiteframe="8">
+    <gauge-header name="$ctrl.QppData.name" status="$ctrl.QppData.status" link="$ctrl.QppData.link"
+                  tooltip="$ctrl.QppData.tooltip"></gauge-header>
+    <md-content layout-padding><label><input type="radio" ng-model="quarter" value="{{$ctrl.QppData.c_quarter}}">
+        {{$ctrl.QppData.c_quarter}}</label><br><label><input type="radio" ng-model="quarter"
+                                                             value="{{$ctrl.QppData.n_quarter}}">
+        {{$ctrl.QppData.n_quarter}}</label><br><span></span>
+        <div ng-if="quarter==$ctrl.QppData.c_quarter">
+            <div class="gauge-row" layout="column" layout-gt-sm="row">
+                <qpp-default flex></qpp-default>
+                <qpp-comm flex></qpp-comm>
+            </div>
+            <br>
+            <div class="gauge-row" layout="column" layout-gt-sm="row">
+                <qpp-prod flex></qpp-prod>
+            </div>
+        </div>
+        <div ng-if="quarter==$ctrl.QppData.n_quarter">
+            <div class="gauge-row" layout="column" layout-gt-sm="row">
+                <qpp-default-next flex></qpp-default-next>
+                <qpp-comm-next flex></qpp-comm-next>
+            </div>
+            <br>
+            <div class="gauge-row" layout="column" layout-gt-sm="row">
+                <qpp-prod-next flex></qpp-prod-next>
+            </div>
+        </div>
+    </md-content>
+</div>'),t.put("qpp/component.qppComm.tpl.html",'
+<div md-whiteframe="8">
+    <gauge-header name="$ctrl.qppCommData.name" status="$ctrl.qppCommData.status" link="$ctrl.qppCommData.link"
+                  tooltip="$ctrl.qppCommData.tooltip"></gauge-header>
+    <md-content layout-padding>
+        <div class="data-grid">
+            <div class="data-grid-header" layout="row" ng-hide="$ctrl.qppCommData.metrics.length">
+                <div flex="100" layout="row">
+                    <div class="md-subhead">No Comm metrics available for selected company</div>
+                </div>
+            </div>
+            <div class="data-grid-header" layout="row" ng-show="$ctrl.qppCommData.metrics.length>0">
+                <div flex layout="row" layout-align="start center">
+                    <div class="md-subhead"><strong>Number</strong></div>
+                </div>
+                <div flex layout="row" layout-align="center center">
+                    <div class="md-subhead"><strong>Action</strong></div>
+                </div>
+                <div flex layout="row" layout-align="center center">
+                    <div class="md-subhead"><strong>State</strong></div>
+                </div>
+                <div flex layout="row" layout-align="center center">
+                    <div class="md-subhead"><strong>Type</strong></div>
+                </div>
+            </div>
+            <div layout="column" ng-repeat="metric in $ctrl.qppCommData.metrics">
+                <div class="data-grid-row" layout="row">
+                    <div flex="33" metric-cell-status="{{metric.status}}" layout="row" layout-align="start center"
+                         ng-click="$ctrl.launchLink(metric.comm_link)" md-ink-ripple>
+                        <md-tooltip md-direction="top" ng-if="metric.tooltip" md-autohide>{{metric.tooltip}}
+                        </md-tooltip>
+                        <div class="md-body-1">{{metric.comm_num}}</div>
+                    </div>
+                    <div flex="33" metric-cell-status="{{metric.status}}" layout="row" layout-align="center center"
+                         ng-click="" md-ink-ripple>
+                        <md-tooltip md-direction="top" ng-if="metric.open.tooltip" md-autohide>{{metric.open.tooltip}}
+                        </md-tooltip>
+                        <div class="md-body-1">{{metric.action_needed}}</div>
+                    </div>
+                    <div flex="33" metric-cell-status="" layout="row" layout-align="center center"
+                         ng-click="$ctrl.launchLink(metric.upgrade_group_link)" md-ink-ripple>
+                        <md-tooltip md-direction="top" ng-if="metric.closedIncomplete.tooltip" md-autohide>
+                            {{metric.closedIncomplete.tooltip}}
+                        </md-tooltip>
+                        <div class="md-body-1">{{metric.upgrade_group}}</div>
+                    </div>
+                    <div flex="33" metric-cell-status="" layout="row" layout-align="center center"
+                         ng-click="$ctrl.launchLink(metric.upgrade_group_link)" md-ink-ripple>
+                        <md-tooltip md-direction="top" ng-if="metric.tooltip" md-autohide>{{metric.tooltip}}
+                        </md-tooltip>
+                        <div class="md-body-1">{{metric.patch_type}}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </md-content>
+</div>'),t.put("qpp/component.qppCommNext.tpl.html",'
+<div md-whiteframe="8">
+    <gauge-header name="$ctrl.qppCommNextData.name" status="$ctrl.qppCommNextData.status"
+                  link="$ctrl.qppCommNextData.link" tooltip=""></gauge-header>
+    <md-content layout-padding>
+        <div class="data-grid">
+            <div class="data-grid-header" layout="row" ng-hide="$ctrl.qppCommNextData.metrics.length">
+                <div flex="100" layout="row">
+                    <div class="md-subhead">No Change metrics available for selected company</div>
+                </div>
+            </div>
+            <div class="data-grid-header" layout="row" ng-show="$ctrl.qppCommNextData.metrics.length>0">
+                <div flex layout="row" layout-align="start center">
+                    <div class="md-subhead"><strong>Number</strong></div>
+                </div>
+                <div flex layout="row" layout-align="center center">
+                    <div class="md-subhead"><strong>Action</strong></div>
+                </div>
+                <div flex layout="row" layout-align="center center">
+                    <div class="md-subhead"><strong>State</strong></div>
+                </div>
+                <div flex layout="row" layout-align="center center">
+                    <div class="md-subhead"><strong>Type</strong></div>
+                </div>
+            </div>
+            <div layout="column" ng-repeat="metric in $ctrl.qppCommNextData.metrics">
+                <div class="data-grid-row" layout="row">
+                    <div flex="33" metric-cell-status="{{metric.status}}" layout="row" layout-align="start center"
+                         ng-click="$ctrl.launchLink(metric.comm_link)" md-ink-ripple>
+                        <md-tooltip md-direction="top" ng-if="metric.tooltip" md-autohide>{{metric.tooltip}}
+                        </md-tooltip>
+                        <div class="md-body-1">{{metric.comm_num}}</div>
+                    </div>
+                    <div flex="33" metric-cell-status="{{metric.status}}" layout="row" layout-align="center center"
+                         ng-click="" md-ink-ripple>
+                        <md-tooltip md-direction="top" ng-if="metric.open.tooltip" md-autohide>{{metric.open.tooltip}}
+                        </md-tooltip>
+                        <div class="md-body-1">{{metric.action_needed}}</div>
+                    </div>
+                    <div flex="33" metric-cell-status="" layout="row" layout-align="center center"
+                         ng-click="$ctrl.launchLink(metric.upgrade_group_link)" md-ink-ripple>
+                        <md-tooltip md-direction="top" ng-if="metric.tooltip" md-autohide>{{metric.tooltip}}
+                        </md-tooltip>
+                        <div class="md-body-1">{{metric.upgrade_group}}</div>
+                    </div>
+                    <div flex="33" metric-cell-status="" layout="row" layout-align="center center"
+                         ng-click="$ctrl.launchLink(metric.upgrade_group_link)" md-ink-ripple>
+                        <md-tooltip md-direction="top" ng-if="metric.closedIncomplete.tooltip" md-autohide>
+                            {{metric.closedIncomplete.tooltip}}
+                        </md-tooltip>
+                        <div class="md-body-1">{{metric.patch_type}}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </md-content>
+</div>'),t.put("qpp/component.qppDefault.tpl.html",'
+<div md-whiteframe="8">
+    <md-toolbar id="instance-gauge-toolbar" class="gauge-header profile-toolbar md-menu-toolbar">
+        <div class="md-toolbar-tools" layout="row">
+            <md-tooltip>{{$ctrl.qppDefaultData.tooltip}}</md-tooltip>
+            <h2><span layout-align="left">{{$ctrl.qppDefaultData.name}}</span></h2></div>
+    </md-toolbar>
+    <md-content layout-padding>
+        <div class="data-grid">
+            <div class="data-grid-header" layout="row" ng-hide="$ctrl.qppDefaultData.metrics.length">
+                <div flex="100" layout="row">
+                    <div class="md-subhead">No Comm metrics available for selected company</div>
+                </div>
+            </div>
+            <div class="data-grid-header" layout="row" ng-show="$ctrl.qppDefaultData.metrics.length>0">
+                <div flex layout="row" layout-align="start center">
+                    <div class="md-subhead"><strong>Patching Program</strong></div>
+                </div>
+                <div flex layout="row" layout-align="center center">
+                    <div class="md-subhead"><strong>Family</strong></div>
+                </div>
+                <div flex layout="row" layout-align="center center">
+                    <div class="md-subhead"><strong>Target</strong></div>
+                </div>
+            </div>
+            <div layout="column" ng-repeat="metric in $ctrl.qppDefaultData.metrics | orderBy : \'family\'">
+                <div layout="row">
+                    <div flex="33" layout="row" layout-align="start center" md-ink-ripple>
+                        <md-tooltip md-direction="top" ng-if="metric.tooltip" md-autohide>{{metric.tooltip}}
+                        </md-tooltip>
+                        <div class="md-body-1">{{metric.pp}}</div>
+                    </div>
+                    <div flex="33" layout="row" layout-align="center center" md-ink-ripple>
+                        <md-tooltip md-direction="top" ng-if="metric.tooltip" md-autohide>{{metric.tooltip}}
+                        </md-tooltip>
+                        <div class="md-body-1">{{metric.family}}</div>
+                    </div>
+                    <div flex="33" layout="row" layout-align="center center" md-ink-ripple>
+                        <md-tooltip md-direction="top" ng-if="metric.tooltip" md-autohide>{{metric.tooltip}}
+                        </md-tooltip>
+                        <div class="md-body-1">{{metric.target}}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </md-content>
+</div>'),t.put("qpp/component.qppDefaultNext.tpl.html",'
+<div md-whiteframe="8">
+    <md-toolbar id="instance-gauge-toolbar" class="gauge-header profile-toolbar md-menu-toolbar">
+        <div class="md-toolbar-tools" layout="row">
+            <md-tooltip>{{$ctrl.qppDefaultNextData.tooltip}}</md-tooltip>
+            <h2><span layout-align="left">{{$ctrl.qppDefaultNextData.name}}</span></h2></div>
+    </md-toolbar>
+    <md-content layout-padding>
+        <div class="data-grid">
+            <div class="data-grid-header" layout="row" ng-hide="$ctrl.qppDefaultNextData.metrics.length">
+                <div flex="100" layout="row">
+                    <div class="md-subhead">No Comm metrics available for selected company</div>
+                </div>
+            </div>
+            <div class="data-grid-header" layout="row" ng-show="$ctrl.qppDefaultNextData.metrics.length>0">
+                <div flex layout="row" layout-align="start center">
+                    <div class="md-subhead"><strong>Patching Program</strong></div>
+                </div>
+                <div flex layout="row" layout-align="center center">
+                    <div class="md-subhead"><strong>Family</strong></div>
+                </div>
+                <div flex layout="row" layout-align="center center">
+                    <div class="md-subhead"><strong>Target</strong></div>
+                </div>
+            </div>
+            <div layout="column" ng-repeat="metric in $ctrl.qppDefaultNextData.metrics | orderBy : \'family\'">
+                <div layout="row">
+                    <div flex="33" layout="row" layout-align="start center" md-ink-ripple>
+                        <md-tooltip md-direction="top" ng-if="metric.tooltip" md-autohide>{{metric.tooltip}}
+                        </md-tooltip>
+                        <div class="md-body-1">{{metric.pp}}</div>
+                    </div>
+                    <div flex="33" layout="row" layout-align="center center" md-ink-ripple>
+                        <md-tooltip md-direction="top" ng-if="metric.tooltip" md-autohide>{{metric.tooltip}}
+                        </md-tooltip>
+                        <div class="md-body-1">{{metric.family}}</div>
+                    </div>
+                    <div flex="33" metric-cell-status="" layout="row" layout-align="center center" md-ink-ripple>
+                        <md-tooltip md-direction="top" ng-if="metric.tooltip" md-autohide>{{metric.tooltip}}
+                        </md-tooltip>
+                        <div class="md-body-1">{{metric.target}}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </md-content>
+</div>'),
+t.put("qpp/component.qppProd.tpl.html",'
+<div md-whiteframe="8">
+    <gauge-header name="$ctrl.qppProdData.name" status="$ctrl.qppProdData.status" link="$ctrl.qppProdData.link"
+                  tooltip="$ctrl.qppProdData.tooltip"></gauge-header>
+    <md-content layout-padding>
+        <div class="data-grid">
+            <div class="data-grid">
+                <div class="data-grid-header" layout="row" ng-hide="$ctrl.qppProdData.metrics.length">
+                    <div flex="100" layout="row">
+                        <div class="md-subhead">No Prod metrics available for selected company</div>
+                    </div>
+                </div>
+                <div class="data-grid-header" layout="row" ng-show="$ctrl.qppProdData.metrics.length>0">
+                    <div flex layout="row" layout-align="start center">
+                        <div class="md-subhead"><strong>Instance</strong></div>
+                    </div>
+                    <div flex layout="row" layout-align="center center">
+                        <div class="md-subhead"><strong>Current</strong></div>
+                    </div>
+                    <div flex layout="row" layout-align="center center">
+                        <div class="md-subhead"><strong>Target</strong></div>
+                    </div>
+                    <div flex layout="row" layout-align="center center">
+                        <div class="md-subhead"><strong>Change</strong></div>
+                    </div>
+                    <div flex layout="row" layout-align="center center">
+                        <div class="md-subhead"><strong>Schedule</strong></div>
+                    </div>
+                </div>
+                <div layout="column" ng-repeat="metric in $ctrl.qppProdData.metrics | orderBy : \'pp\'">
+                    <div class="data-grid-row" layout="row">
+                        <div flex="33" metric-cell-status="{{metric.status}}" layout="row" layout-align="start center"
+                             ng-click="$ctrl.launchLink(metric.inst_link)" md-ink-ripple>
+                            <md-tooltip md-direction="top" ng-if="metric.tooltip" md-autohide>{{metric.tooltip}}
+                            </md-tooltip>
+                            <div class="md-body-1">{{metric.instance_prod}}</div>
+                        </div>
+                        <div flex="33" metric-cell-status="{{metric.status}}" layout="row" layout-align="center center"
+                             ng-click="" md-ink-ripple>
+                            <md-tooltip md-direction="top" ng-if="metric.open.tooltip" md-autohide>
+                                {{metric.open.tooltip}}
+                            </md-tooltip>
+                            <div class="md-body-1">{{metric.currentversion}}</div>
+                        </div>
+                        <div flex="33" metric-cell-status="{{metric.status}}" layout="row" layout-align="center center"
+                             ng-click="" md-ink-ripple>
+                            <md-tooltip md-direction="top" ng-if="metric.closedIncomplete.tooltip" md-autohide>
+                                {{metric.closedIncomplete.tooltip}}
+                            </md-tooltip>
+                            <div class="md-body-1">{{metric.targetversion}}</div>
+                        </div>
+                        <div flex="33" metric-cell-status="{{metric.status}}" layout="row" layout-align="center center"
+                             ng-click="$ctrl.launchLink(metric.chg_link)" md-ink-ripple>
+                            <md-tooltip md-direction="top" ng-if="metric.closedIncomplete.tooltip" md-autohide>
+                                {{metric.closedIncomplete.tooltip}}
+                            </md-tooltip>
+                            <div class="md-body-1">{{metric.chg}}</div>
+                        </div>
+                        <div flex="33" metric-cell-status="{{metric.status}}" layout="row" layout-align="center center"
+                             ng-click="$ctrl.launchLink(metric.chg_link)" md-ink-ripple>
+                            <md-tooltip md-direction="top" ng-if="metric.closedIncomplete.tooltip" md-autohide>
+                                {{metric.closedIncomplete.tooltip}}
+                            </md-tooltip>
+                            <div class="md-body-1">{{metric.date}}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </md-content>
+</div>'),t.put("qpp/component.qppProdNext.tpl.html",'
+<div md-whiteframe="8">
+    <gauge-header name="$ctrl.qppProdNextData.name" status="$ctrl.qppProdNextData.status"
+                  link="$ctrl.qppProdNextData.link" tooltip="$ctrl.qppProdNextData.tooltip"></gauge-header>
+    <md-content layout-padding>
+        <div class="data-grid">
+            <div class="data-grid">
+                <div class="data-grid-header" layout="row" ng-hide="$ctrl.qppProdNextData.metrics.length">
+                    <div flex="100" layout="row">
+                        <div class="md-subhead">No Prod metrics available for selected company</div>
+                    </div>
+                </div>
+                <div class="data-grid-header" layout="row" ng-show="$ctrl.qppProdNextData.metrics.length>0">
+                    <div flex layout="row" layout-align="start center">
+                        <div class="md-subhead"><strong>Instance</strong></div>
+                    </div>
+                    <div flex layout="row" layout-align="center center">
+                        <div class="md-subhead"><strong>Current</strong></div>
+                    </div>
+                    <div flex layout="row" layout-align="center center">
+                        <div class="md-subhead"><strong>Target</strong></div>
+                    </div>
+                    <div flex layout="row" layout-align="center center">
+                        <div class="md-subhead"><strong>Change</strong></div>
+                    </div>
+                    <div flex layout="row" layout-align="center center">
+                        <div class="md-subhead"><strong>Schedule</strong></div>
+                    </div>
+                </div>
+                <div layout="column" ng-repeat="metric in $ctrl.qppProdNextData.metrics | orderBy : \'pp\'">
+                    <div class="data-grid-row" layout="row">
+                        <div flex="33" metric-cell-status="{{metric.status}}" layout="row" layout-align="start center"
+                             ng-click="$ctrl.launchLink(metric.inst_link)" md-ink-ripple>
+                            <md-tooltip md-direction="top" ng-if="metric.tooltip" md-autohide>{{metric.tooltip}}
+                            </md-tooltip>
+                            <div class="md-body-1">{{metric.instance_prod}}</div>
+                        </div>
+                        <div flex="33" metric-cell-status="{{metric.status}}" layout="row" layout-align="center center"
+                             ng-click="" md-ink-ripple>
+                            <md-tooltip md-direction="top" ng-if="metric.open.tooltip" md-autohide>{{metric.tooltip}}
+                            </md-tooltip>
+                            <div class="md-body-1">{{metric.currentversion}}</div>
+                        </div>
+                        <div flex="33" metric-cell-status="{{metric.status}}" layout="row" layout-align="center center"
+                             ng-click="" md-ink-ripple>
+                            <md-tooltip md-direction="top" ng-if="metric.tooltip" md-autohide>{{metric.tooltip}}
+                            </md-tooltip>
+                            <div class="md-body-1">{{metric.targetversion}}</div>
+                        </div>
+                        <div flex="33" metric-cell-status="{{metric.status}}" layout="row" layout-align="center center"
+                             ng-click="$ctrl.launchLink(metric.chg_link)" md-ink-ripple>
+                            <md-tooltip md-direction="top" ng-if="metric.tooltip" md-autohide>{{metric.tooltip}}
+                            </md-tooltip>
+                            <div class="md-body-1">{{metric.chg}}</div>
+                        </div>
+                        <div flex="33" metric-cell-status="{{metric.status}}" layout="row" layout-align="center center"
+                             ng-click="$ctrl.launchLink(metric.chg_link)" md-ink-ripple>
+                            <md-tooltip md-direction="top" ng-if="metric.tooltip" md-autohide>{{metric.tooltip}}
+                            </md-tooltip>
+                            <div class="md-body-1">{{metric.date}}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </md-content>
+</div>'),t.put("utils/component.gaugeHeader.tpl.html",'
+<md-toolbar ng-click="$ctrl.launchLink()" class="gauge-header" md-ink-ripple
+            ng-class="{\'md-warn\': $ctrl.status === \'u_red\', \'md-primary\': $ctrl.status === \'u_green\', \'md-accent\': $ctrl.status === \'u_yellow\'}">
+    <div layout="row" layout-align="start center" class="md-toolbar-tools">
+        <md-tooltip md-direction="top" ng-if="$ctrl.tooltip" md-autohide>{{$ctrl.tooltip}}</md-tooltip>
+        <span>{{$ctrl.name}}</span></div>
+</md-toolbar>')}])}();

@@ -1,0 +1,30 @@
+<j:jelly trim="false" xmlns:j="jelly:core" xmlns:g="glide" xmlns:j2="null" xmlns:g2="null">
+    <style>
+        div.financialsLabel {
+        padding-left: 135px;
+        font-weight: bold;
+        font-size: 13px;
+        }
+    </style>
+    <body>
+        <div class="financialsLabel">
+            <p id="demo">EP1 7D 2 (1)</p>
+        </div>
+    </body>
+    <script>
+        showRelatedList();
+        function showRelatedList() {
+        var designation="$[current.getValue('u_designation')]";
+        var ga = new GlideAjax('POEAJAX');
+        ga.addParam('sysparm_name','getLabelWeight');
+        ga.addParam('sysparm_metricName',"u_ep1_7d");
+        ga.addParam('sysparm_designation',designation);
+        ga.getXML(HelloWorldParse);
+        }
+        function HelloWorldParse(response) {
+        var answer = response.responseXML.documentElement.getAttribute("answer");
+        document.getElementById("demo").innerHTML = "EP1 7D 2 ("+answer+")";
+        }
+    </script>
+
+</j:jelly>

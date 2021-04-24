@@ -1,0 +1,19 @@
+{
+  "name": "parcel-sandbox",
+  "version": "1.0.0",
+  "description": "Simple Parcel Sandbox",
+  "main": "index.html",
+  "scripts": {
+    "start": "parcel index.html --open",
+    "build": "parcel build index.html"
+  },
+  "dependencies": {
+    "node-where": "^1.1.0",
+    "speak-tts": "^2.0.8",
+    "systeminformation": "^3.54.0"
+  },
+  "devDependencies": {
+    "parcel-bundler": "^1.12.3",
+    "require": "2.4.20"
+  }
+}

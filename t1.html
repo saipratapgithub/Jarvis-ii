@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+
+<j:jelly trim="false" xmlns:j="jelly:core" xmlns:g="glide" xmlns:j2="null" xmlns:g2="null">
+
+    <style>
+        div.financialsLabel {
+            padding-left: 135px;
+            font-weight: bold;
+            font-size: 13px;
+        }
+    </style>
+
+    <g:evaluate var="jvar_log_user" object="true">
+
+        var gr = new GlideRecord('sys_user');
+
+        gr.addEncodedQuery('name='+gs.getUserID());
+
+        gr.query();
+
+        gr;
+
+    </g:evaluate>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.9/angular.min.js"></script>
+
+
+    <script>
+
+        var app = angular.module('poeMetric', []);
+        app.controller('poeContoller', function($scope) {
+                var designation="$[current.getValue('u_designation')]";
+                var ga = new GlideAjax('POEAJAX');
+                ga.addParam('sysparm_name','getLabelWeight');
+                ga.addParam('sysparm_metricName',"u_ep1_7d");
+                ga.addParam('sysparm_designation',designation);
+                ga.getXML(HelloWorldParse);
+            function HelloWorldParse(response) {
+                $scope.pAnswer = response.responseXML.documentElement.getAttribute("answer");
+                $scope.metricWgt=true;
+            }
+        });
+    </script>
+    <div ng-app="poeMetric" ng-controller="poeContoller">
+        <div class="financialsLabel" ng-show="metricWgt">
+            <h4>${jvar_log_user.getDisplayValue('user_name')}</h4>
+
+
+            <p id="demo">{{pAnswer}}</p>
+        </div>
+    </div>
+</j:jelly>
